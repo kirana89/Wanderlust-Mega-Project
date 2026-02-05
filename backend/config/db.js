@@ -1,16 +1,21 @@
 import mongoose from 'mongoose';
 import { MONGODB_URI } from './utils.js';
-
-export default async function connectDB() {
+export default function connectDB() {
   try {
-    await mongoose.connect(MONGODB_URI);
-    console.log(`Database connected: ${MONGODB_URI}`);
+    mongoose.connect(MONGODB_URI);
   } catch (err) {
-    console.error('MongoDB connection failed:', err.message);
+    console.error(err.message);
     process.exit(1);
   }
 
-  mongoose.connection.on('error', (err) => {
-    console.error('MongoDB runtime error:', err.message);
+  const dbConnection = mongoose.connection;
+
+  dbConnection.once('open', () => {
+    console.log(`Database connected: ${MONGODB_URI}`);
   });
+
+  dbConnection.on('error', (err) => {
+    console.error(`connection error: ${MONGODB_URI}`);
+  });
+  return;
 }
